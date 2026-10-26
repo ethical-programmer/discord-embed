@@ -1,0 +1,15 @@
+.vscode/**
+node_modules/**
+src/**
+shared/**
+webview-ui/**
+legacy/**
+**/*.map
+**/*.ts
+tsconfig.json
+vite.config.mts
+.gitignore
+HOW_TO_EDIT.md
+*.vsix
+icon.svg
+images/**

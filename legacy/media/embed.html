@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Embed</title>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+    <style>
+        /* Theme variables */
+        :root {
+            --bg-dark: #2C2F33;
+            --bg-light: #f2f3f5;
+            --embed-bg-dark: #36393F;
+            --embed-bg-light: #ffffff;
+            --text-dark: #ffffff;
+            --text-light: #2e3338;
+            --secondary-text-dark: #B9BBBE;
+            --secondary-text-light: #747f8d;
+            --accent-color: #7289DA;
+            --accent-color-hover: #5C6FDD;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B9BBBE;
+            --text-muted: #72767D;
+            --success-color: #43B581;
+            --danger-color: #F04747;
+            --secondary-color: #99AAB5;
+            --border-radius: 10px;
+            --transition-speed: 0.2s;
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.15);
+            --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+        
+        body {
+            font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-primary) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+            overflow-y: auto;
+            color: var(--text-primary);
+            transition: background-color var(--transition-speed) ease;
+        }
+        
+        body.light-theme {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .embed-container {
+            position: relative;
+            width: 90%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: var(--bg-tertiary);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        
+        .embed-container:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-soft), 0 10px 30px rgba(114, 137, 218, 0.2);
+        }
+
+        .embed {
+            background-color: var(--bg-secondary);
+            border-left: 5px solid var(--accent-color);
+            border-radius: var(--border-radius);
+            width: 100%;
+            color: var(--text-primary);
+            padding: 20px;
+            box-sizing: border-box;
+            position: relative;
+            overflow-y: auto;
+            box-shadow: var(--shadow-soft);
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        
+        .embed:hover {
+            box-shadow: 0 6px 15px rgba(114, 137, 218, 0.1);
+        }
+        
+        body.light-theme .embed {
+            background-color: var(--embed-bg-light);
+            color: var(--text-light);
+        }
+
+        .editable {
+            position: relative;
+            margin-bottom: 10px;
+            transition: all var(--transition-speed) ease;
+            border-radius: var(--border-radius);
+            padding: 2px;
+            overflow: visible;
+        }
+        
+        .editable:hover {
+            background-color: rgba(114, 137, 218, 0.1);
+            box-shadow: 0 0 0 1px rgba(114, 137, 218, 0.2);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .close-btn:hover {
+            background-color: #ff3333;
+            transform: scale(1.15);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* Remove any specific positioning that might override the main close-btn position */
+        .embed-field .close-btn,
+        .button-container .close-btn,
+        .embed-author-container .close-btn,
+        .embed-title-container .close-btn,
+        .embed-description-container .close-btn,
+        .embed-image-container .close-btn,
+        .embed-thumbnail-container .close-btn,
+        .author-icon-container .close-btn,
+        .footer-icon-container .close-btn {
+            top: 5px;
+            right: 5px;
+        }
+
+        .editable:hover .close-btn {
+            display: flex;
+        }
+        
+        /* Specific positioning for different element types */
+        .embed-field .close-btn {
+            top: 2px;
+            right: 2px;
+        }
+        
+        .button-container .close-btn {
+            top: 2px;
+            right: 2px;
+        }
+        
+        .embed-author-container .close-btn {
+            top: 2px;
+            right: 2px;
+        }
+        
+        .embed-title-container .close-btn {
+            top: 2px;
+            right: 2px;
+        }
+        
+        .embed-description-container .close-btn {
+            top: 2px;
+            right: 2px;
+        }
+        
+        .embed-image-container .close-btn,
+        .embed-thumbnail-container .close-btn,
+        .author-icon-container .close-btn,
+        .footer-icon-container .close-btn {
+            top: 2px;
+            right: 2px;
+        }
+
+        .fade-out {
+            opacity: 0;
+        }
+
+        .embed-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .author-icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .author-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .embed-author-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .embed-author {
+            font-size: 12px;
+            color: #B9BBBE;
+            cursor: pointer;
+        }
+
+        .embed-title-container {
+            position: relative;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .embed-title {
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .embed-description-container {
+            position: relative;
+            margin-bottom: 20px;
+            margin-right: 100px;
+            word-wrap: break-word;
+            cursor: pointer;
+        }
+
+        .embed-description {
+            font-size: 14px;
+            color: white;
+        }
+
+        .embed-fields {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .embed-field {
+            width: 100%;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .embed-field-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .embed-field-content {
+            font-size: 14px;
+            color: #B9BBBE;
+        }
+
+        .full-width-field {
+            position: relative;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .embed-field-title,
+        .embed-field-content {
+            margin: 0;
+        }
+
+        .embed-image-container {
+            position: relative;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+
+        .embed-image {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .embed-thumbnail-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .embed-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+        }
+
+        .embed-footer {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .footer-left {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .footer-icon-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+
+        .footer-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .footer-text-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            color: #B9BBBE;
+        }
+
+        .timestamp-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #B9BBBE;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .button-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 4px;
+            margin-bottom: 4px;
+            cursor: pointer;
+        }
+
+        .button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            margin-right: 0;
+            margin-bottom: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity var(--transition-speed) ease;
+        }
+        
+        .button:hover::after {
+            opacity: 1;
+        }
+        
+        .button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .button:hover {
+            background-color: #5C6FDD;
+        }
+
+        .plus-icon {
+            position: fixed;
+            top: 10px;
+            right: 50px;
+            background-color: #686666;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            opacity: 0.6;
+            font-size: 22px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            z-index: 1000;
+            display: flex;
+        }
+
+        .color-picker {
+            position: fixed;
+            top: 10px;
+            right: 90px;
+            z-index: 1000;
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+        }
+
+        .color-picker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .plus-icon-button {
+            position: absolute;
+            top: 3px;
+            right: -22px;
+            background-color: #686666;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            opacity: 0.6;
+            font-size: 22px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            padding: 2px;
+            z-index: 1;
+            display: flex;
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background-color: #36393F;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            width: 200px;
+        }
+
+        .dropdown-item {
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            border-bottom: 1px solid #2C2F33;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background-color: #7289DA;
+        }
+
+        .dropdown-item.disabled {
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            /* Minimal blur effect */
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: rgba(54, 57, 63, 0.51);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 400px;
+            color: var(--text-primary);
+            position: relative;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            animation: modalFadeIn 0.3s ease;
+            backdrop-filter: blur(0.5px);
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-content label {
+            color: white;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .modal-content input,
+        .modal-content textarea,
+        .modal-content select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background-color: rgba(0, 0, 0, 0.1);
+            color: var(--text-primary);
+            box-sizing: border-box;
+            transition: all var(--transition-speed) ease;
+            font-size: 14px;
+        }
+        
+        .modal-content input:focus,
+        .modal-content textarea:focus,
+        .modal-content select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(114, 137, 218, 0.25);
+        }
+        
+        .modal-content label {
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .modal-content button {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .modal-content button:hover {
+            background-color: var(--accent-color-hover);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-content button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content button:hover {
+            background-color: #5C6FDD;
+        }
+
+        .color-picker-container {
+            margin-bottom: 10px;
+        }
+        
+        .color-picker-container input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .color-picker-container label {
+            display: block;
+            margin-top: 5px;
+            font-size: 12px;
+            color: var(--secondary-text-dark);
+        }
+        
+        body.light-theme .color-picker-container label {
+            color: var(--secondary-text-light);
+        }
+        
+        .preset-colors {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .color-option {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all var(--transition-speed) ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .color-option::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 14px;
+            height: 14px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            transition: transform var(--transition-speed) ease;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-option.selected {
+            border-color: white;
+            box-shadow: 0 0 0 2px var(--accent-color), 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .color-option.selected::after {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        body.light-theme .color-option.selected {
+            border-color: #36393F;
+        }
+        
+        .color-secondary {
+            background-color: #99AAB5;
+        }
+
+        .color-success {
+            background-color: #43B581;
+        }
+
+        .color-danger {
+            background-color: #F04747;
+        }
+
+        .color-primary {
+            background-color: #7289DA;
+        }
+
+        /* For screens smaller than 1200px */
+        @media (max-width: 1200px) {
+            .embed-container {
+                width: 80%;
+            }
+
+            .embed {
+                padding: 15px;
+            }
+
+            .embed-title {
+                font-size: 16px;
+            }
+
+            .embed-description {
+                font-size: 13px;
+            }
+
+            .embed-field-title,
+            .embed-field-content {
+                font-size: 13px;
+            }
+
+            .button {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+        }
+
+        /* For screens smaller than 992px */
+        @media (max-width: 992px) {
+            .embed-container {
+                width: 85%;
+            }
+
+            .embed {
+                padding: 12px;
+            }
+
+            .embed-title {
+                font-size: 15px;
+            }
+
+            .embed-description {
+                font-size: 12px;
+            }
+
+            .embed-field-title,
+            .embed-field-content {
+                font-size: 12px;
+            }
+
+            .button {
+                padding: 7px 14px;
+                font-size: 12px;
+            }
+        }
+
+        /* For screens smaller than 768px */
+        @media (max-width: 768px) {
+            .embed-container {
+                width: 90%;
+            }
+
+            .embed {
+                padding: 10px;
+            }
+
+            .embed-title {
+                font-size: 14px;
+            }
+
+            .embed-description {
+                font-size: 11px;
+            }
+
+            .embed-field-title,
+            .embed-field-content {
+                font-size: 11px;
+            }
+
+            .button {
+                padding: 6px 12px;
+                font-size: 11px;
+            }
+
+            .get-code-button {
+                top: -30px;
+                font-size: 12px;
+            }
+        }
+
+        /* For screens smaller than 576px */
+        @media (max-width: 576px) {
+            .embed-container {
+                width: 95%;
+            }
+
+            .embed {
+                padding: 8px;
+            }
+
+            .embed-title {
+                font-size: 13px;
+            }
+
+            .embed-description {
+                font-size: 10px;
+            }
+
+            .embed-field-title,
+            .embed-field-content {
+                font-size: 10px;
+            }
+
+            .button {
+                padding: 5px 10px;
+                font-size: 10px;
+            }
+
+            .get-code-button {
+                top: -25px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .embed {
+                padding: 10px;
+            }
+
+            .embed-title {
+                font-size: 16px;
+            }
+
+            .embed-description {
+                font-size: 12px;
+            }
+
+            .embed-field-title,
+            .embed-field-content {
+                font-size: 12px;
+            }
+
+            .button {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+
+        .get-code-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-speed) ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: absolute;
+            top: -55px;
+            left: 50%;
+            transform: translateX(-50%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .get-code-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .get-code-button:hover::before {
+            left: 100%;
+        }
+        
+        .get-code-button:hover {
+            background-color: var(--accent-color-hover);
+            box-shadow: 0 4px 15px rgba(114, 137, 218, 0.4);
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        /* Plus icon styling */
+        .plus-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-medium);
+            transition: all var(--transition-speed) ease;
+            z-index: 1000;
+        }
+
+        .plus-icon:hover {
+            background-color: var(--accent-color-hover);
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(114, 137, 218, 0.4);
+        }
+
+        .plus-icon-button {
+            width: 36px;
+            height: 36px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-soft);
+            transition: all var(--transition-speed) ease;
+            margin: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .plus-icon-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .plus-icon-button:hover {
+            background-color: var(--accent-color-hover);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(114, 137, 218, 0.4);
+        }
+        
+        .plus-icon-button:hover::before {
+            left: 100%;
+        }
+
+        /* Color picker styling */
+        .color-picker {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            background-color: transparent;
+            transition: all var(--transition-speed) ease;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+        
+        .color-picker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(114, 137, 218, 0.4);
+        }
+
+        /* Dropdown styling */
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 55px;
+            right: 10px;
+            background-color: rgba(32, 34, 37, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            padding: 8px 0;
+            z-index: 999;
+            max-height: 300px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.2s ease;
+            width: 180px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-item {
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-size: 14px;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--accent-color);
+        }
+
+        .dropdown-item.disabled {
+            color: #72767d;
+            cursor: not-allowed;
+            background-color: transparent;
+        }
+
+        .popup-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #36393F;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+        }
+
+        .zoom-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .settings-button {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all var(--transition-speed) ease;
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .settings-button:hover {
+            background-color: var(--accent-color-hover);
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(114, 137, 218, 0.4);
+        }
+        
+        .settings-dropdown {
+            position: absolute;
+            bottom: 50px;
+            right: 0;
+            background-color: rgba(32, 34, 37, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-medium);
+            padding: 8px 0;
+            z-index: 999;
+            min-width: 150px;
+            display: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.2s ease;
+        }
+        
+        .settings-item {
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            font-size: 14px;
+        }
+        
+        .settings-item:hover {
+            background-color: var(--accent-color);
+        }
+
+        .blurred {
+            filter: blur(5px);
+        }
+        
+        /* Drag and drop styles */
+        .dragging {
+            opacity: 0.4;
+            cursor: move;
+        }
+        
+        .drag-over {
+            border: 2px dashed #7289DA;
+        }
+        
+        .button-container[draggable="true"] {
+            cursor: move;
+        }
+        
+        .button-container[draggable="true"]:hover {
+            outline: 1px dashed rgba(114, 137, 218, 0.5);
+        }
+        
+        /* Tooltips removed as requested */
+        
+        /* Tooltip animations removed */
+    </style>
+</head>
+
+<body>
+
+    <div class="zoom-controls">
+        <input type="color" class="color-picker" id="colorPicker" value="#7289DA" onchange="changeBorderColor()">
+        <button class="settings-button" onclick="toggleSettingsMenu()">⚙️</button>
+        <div class="settings-dropdown" id="settingsDropdown">
+            <div class="settings-item" onclick="zoomIn()">Zoom In</div>
+            <div class="settings-item" onclick="zoomOut()">Zoom Out</div>
+            <div class="settings-item" onclick="toggleTheme()">Toggle Theme</div>
+        </div>
+    </div>
+    
+    <div class="embed-container">
+        <button class="plus-icon" onclick="toggleDropdown()">+</button>
+        <button class="get-code-button" onclick="showFormatModal()">Get Code</button>
+        
+
+        
+        <div class="embed">
+            <!-- Author Section -->
+            <div class="embed-header">
+                <!-- Author Icon -->
+                <div class="author-icon-container editable">
+                    <img src="https://i.ibb.co/vhYcg0V/Black-and-Gold-Classy-Minimalist-Circular-Name-Logo.png" alt="Author Icon" class="author-icon"
+                        onclick="editImage('authorIcon')">
+                    <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                </div>
+                <!-- Author Name -->
+                <div class="embed-author-container editable">
+                    <span class="embed-author" onclick="editContent('authorName')">Author Name</span>
+                    <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="embed-title-container editable">
+                <div class="embed-title" onclick="editContent('title')">
+                    Embed Title
+                </div>
+                <button class="close-btn" onclick="removeElement(event, this)">×</button>
+            </div>
+
+            <!-- Description -->
+            <div class="embed-description-container editable">
+                <div class="embed-description" onclick="editContent('description')">
+                    This is an example description for the Discord embed. You can add more text here to describe what
+                    the embed is about.
+                </div>
+                <button class="close-btn" onclick="removeElement(event, this)">×</button>
+            </div>
+
+            <!-- Fields -->
+            <div class="embed-fields">
+                <!-- Field 1 -->
+                <div class="embed-field editable" onclick="editContent('field1')">
+                    <div class="embed-field-title">Field 1</div>
+                    <div class="embed-field-content">Content for field 1 goes here.</div>
+                    <button class="close-btn" onclick="removeElement(event, this)" title="Remove field">×</button>
+                </div>
+                <!-- Field 2 -->
+                <div class="embed-field editable" onclick="editContent('field2')">
+                    <div class="embed-field-title">Field 2</div>
+                    <div class="embed-field-content">Content for field 2 goes here.</div>
+                    <button class="close-btn" onclick="removeElement(event, this)" title="Remove field">×</button>
+                </div>
+            </div>
+
+            <!-- Embed Image -->
+            <div class="embed-image-container editable">
+                <img src="https://i.ibb.co/zWZZK1Cd/Untitled-design.png" alt="Embed Image" class="embed-image"
+                    onclick="editImage('image')" title="Click to change image URL">
+                <button class="close-btn" onclick="removeElement(event, this)" title="Remove image">×</button>
+            </div>
+
+            <!-- Thumbnail -->
+            <div class="embed-thumbnail-container editable">
+                <img src="https://i.ibb.co/vhYcg0V/Black-and-Gold-Classy-Minimalist-Circular-Name-Logo.png" alt="Thumbnail" class="embed-thumbnail"
+                    onclick="editImage('thumbnail')" title="Click to change thumbnail URL">
+                <button class="close-btn" onclick="removeElement(event, this)" title="Remove thumbnail">×</button>
+            </div>
+
+            <!-- Footer -->
+            <div class="embed-footer">
+                <!-- Footer Icon -->
+                <div class="footer-icon-container editable">
+                    <img src="https://i.ibb.co/vhYcg0V/Black-and-Gold-Classy-Minimalist-Circular-Name-Logo.png" alt="Footer Icon" class="footer-icon"
+                        onclick="editImage('footerIcon')">
+                    <button class="close-btn" onclick="removeElement(event, this)" title="Remove footer icon">×</button>
+                </div>
+                <!-- Footer Text -->
+                <div class="footer-text-container editable">
+                    <span class="footer-text" onclick="editContent('footerText')" title="Click to edit footer text">Footer Text</span>
+                    <button class="close-btn" onclick="removeElement(event, this)" title="Remove footer text">×</button>
+                </div>
+                <!-- Timestamp -->
+                <div class="timestamp-container editable">
+                    <span class="timestamp" onclick="editContent('timestamp')" title="Click to edit timestamp">- Today at 12:00 PM</span>
+                    <button class="close-btn" onclick="removeElement(event, this)" title="Remove timestamp">×</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons outside the embed at the bottom -->
+        <div class="buttons">
+            <!-- Button 1 -->
+            <div class="button-container editable" draggable="true">
+                <button class="button" onclick="editButton(this)" data-style="Primary">
+                    Simple Button
+                </button>
+                <button class="close-btn" onclick="removeElement(event, this)">×</button>
+            </div>
+            <!-- Button 2 -->
+            <div class="button-container editable" draggable="true">
+                <button class="button" onclick="editButton(this)" data-style="Primary">Simple Button</button>
+                <button class="close-btn" onclick="removeElement(event, this)">×</button>
+            </div>
+            <!-- Plus Icon for adding new buttons -->
+            <div class="button-container">
+                <button class="plus-icon-button" onclick="addButton()">+</button>
+            </div>
+        </div>
+
+        <!-- Modal Popup -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <label for="modal-input" id="modal-label">Edit Content</label>
+                <input type="text" id="modal-input" />
+                <input type="text" id="modal-input-name" style="display: none;" placeholder="Field Name" />
+                <input type="text" id="modal-input-value" style="display: none;" placeholder="Field Value" />
+                <div id="color-options" style="display: none;">
+                    <p>Select a button style:</p>
+                    <div class="preset-colors">
+                        <div class="color-option color-primary" onclick="selectButtonStyle('Primary', this)" title="Primary (Blurple)"></div>
+                        <div class="color-option color-success" onclick="selectButtonStyle('Success', this)" title="Success (Green)"></div>
+                        <div class="color-option color-danger" onclick="selectButtonStyle('Danger', this)" title="Danger (Red)"></div>
+                        <div class="color-option color-secondary" onclick="selectButtonStyle('Secondary', this)" title="Secondary (Grey)"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px;">
+                    <button onclick="saveContent()">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add this modal for format selection -->
+        <div class="modal" id="formatModal">
+            <div class="modal-content">
+                <h3>Select Code Format</h3>
+                <button onclick="generateEmbedCode('builder')">Builder Format</button>
+                <button onclick="generateEmbedCode('json')">JSON Format</button>
+            </div>
+        </div>
+
+        <script>
+            // Initialize variables
+            let currentElement = null;
+            let editType = null;
+            let selectedStyle = 'Primary';
+            const vscodeTheme = null; // This will be replaced by the extension with actual theme data
+            
+            // Initialize theme based on VS Code or saved preference and setup drag-and-drop
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check for saved theme preference
+                const savedTheme = localStorage.getItem('discordEmbedTheme');
+                if (savedTheme === 'light') {
+                    document.body.classList.add('light-theme');
+                }
+                
+                // Initialize drag and drop for buttons
+                initDragAndDrop();
+                
+                // Initialize field sorting if jQuery is available
+                if (typeof $ !== 'undefined') {
+                    initFieldSorting();
+                }
+            });
+            
+            // Drag and drop functionality
+            function initDragAndDrop() {
+                const buttonContainers = document.querySelectorAll('.button-container[draggable="true"]');
+                buttonContainers.forEach(container => {
+                    addDragListeners(container);
+                });
+                
+                const buttonsContainer = document.querySelector('.buttons');
+                buttonsContainer.addEventListener('dragover', handleDragOver);
+                buttonsContainer.addEventListener('drop', handleDrop);
+            }
+            
+            function addDragListeners(element) {
+                element.addEventListener('dragstart', handleDragStart);
+                element.addEventListener('dragend', handleDragEnd);
+            }
+            
+            let draggedElement = null;
+            
+            function handleDragStart(e) {
+                draggedElement = this;
+                this.style.opacity = '0.4';
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/html', this.innerHTML);
+                
+                // Add a class to indicate this is being dragged
+                this.classList.add('dragging');
+            }
+            
+            function handleDragEnd(e) {
+                this.style.opacity = '1';
+                this.classList.remove('dragging');
+                
+                // Remove highlighting from all potential drop targets
+                document.querySelectorAll('.button-container').forEach(item => {
+                    item.classList.remove('drag-over');
+                });
+            }
+            
+            function handleDragOver(e) {
+                if (e.preventDefault) {
+                    e.preventDefault(); // Allows us to drop
+                }
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            }
+            
+            function handleDrop(e) {
+                if (e.stopPropagation) {
+                    e.stopPropagation(); // Stops some browsers from redirecting
+                }
+                
+                if (draggedElement && e.target.closest('.button-container')) {
+                    const targetContainer = e.target.closest('.button-container');
+                    
+                    // Don't drop on the plus button container
+                    if (!targetContainer.querySelector('.plus-icon-button')) {
+                        const buttonsContainer = document.querySelector('.buttons');
+                        const plusButton = buttonsContainer.lastElementChild;
+                        
+                        // If we're dropping on a different container than the one being dragged
+                        if (draggedElement !== targetContainer) {
+                            // Get the index of the target and dragged elements
+                            const allContainers = Array.from(buttonsContainer.querySelectorAll('.button-container'));
+                            const targetIndex = allContainers.indexOf(targetContainer);
+                            const draggedIndex = allContainers.indexOf(draggedElement);
+                            
+                            // Insert the dragged element before or after the target depending on their positions
+                            if (draggedIndex < targetIndex) {
+                                buttonsContainer.insertBefore(draggedElement, targetContainer.nextSibling);
+                            } else {
+                                buttonsContainer.insertBefore(draggedElement, targetContainer);
+                            }
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Initialize drag and drop for fields and elements
+            function initFieldSorting() {
+                // Check if jQuery and jQuery UI are available
+                if (typeof $ !== 'undefined' && typeof $.fn.sortable !== 'undefined') {
+                    $('.embed-fields').sortable({
+                        items: '.embed-field',
+                        handle: '.embed-field-title',
+                        placeholder: 'embed-field-placeholder',
+                        forcePlaceholderSize: true,
+                        opacity: 0.7,
+                        cursor: 'move',
+                        tolerance: 'pointer',
+                        axis: 'y'
+                    });
+                }
+                
+                // Make buttons draggable
+                $('.buttons').sortable({
+                    items: '.button-container',
+                    handle: '.button',
+                    cursor: 'move',
+                    opacity: 0.6,
+                    revert: true,
+                    tolerance: 'pointer',
+                    cancel: '.plus-icon-button'
+                });
+                
+            }
+            
+            // Listen for theme changes from VS Code
+            window.addEventListener('message', event => {
+                const message = event.data;
+                if (message.command === 'themeChanged') {
+                    if (message.isDark) {
+                        document.body.classList.remove('light-theme');
+                    } else {
+                        document.body.classList.add('light-theme');
+                    }
+                }
+            });
+
+            function toggleDropdown() {
+                const dropdown = document.getElementById('dropdown');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                updateDropdownState();
+            }
+
+            function updateDropdownState() {
+                const existingElements = {
+                    thumbnail: document.querySelector('.embed-thumbnail-container'),
+                    image: document.querySelector('.embed-image-container'),
+                    title: document.querySelector('.embed-title-container'),
+                    description: document.querySelector('.embed-description-container'),
+                    authorName: document.querySelector('.embed-author-container'),
+                    footerText: document.querySelector('.footer-text-container'),
+                    footerIcon: document.querySelector('.footer-icon-container'),
+                    timestamp: document.querySelector('.timestamp-container'),
+                    authorIcon: document.querySelector('.author-icon-container')
+                };
+
+                const maxFields = 25;
+                const currentFields = document.querySelectorAll('.embed-field, .full-width-field').length;
+
+                document.getElementById('addField').classList.toggle('disabled', currentFields >= maxFields);
+                document.getElementById('addThumbnail').classList.toggle('disabled', !!existingElements.thumbnail);
+                document.getElementById('addImage').classList.toggle('disabled', !!existingElements.image);
+                document.getElementById('addTitle').classList.toggle('disabled', !!existingElements.title);
+                document.getElementById('addDescription').classList.toggle('disabled', !!existingElements.description);
+                document.getElementById('addAuthorName').classList.toggle('disabled', !!existingElements.authorName);
+                document.getElementById('addFooterText').classList.toggle('disabled', !!existingElements.footerText);
+                document.getElementById('addFooterIcon').classList.toggle('disabled', !!existingElements.footerIcon);
+                document.getElementById('addTimestamp').classList.toggle('disabled', !!existingElements.timestamp);
+                document.getElementById('addUrl').classList.toggle('disabled', !!existingElements.authorIcon);
+            }
+
+            function addElement(type) {
+                if (document.getElementById(`add${capitalize(type)}`).classList.contains('disabled')) {
+                    return;
+                }
+
+                const embed = document.querySelector('.embed');
+
+                if (type === 'field') {
+                    const newField = document.createElement('div');
+                    newField.className = 'embed-field editable';
+                    newField.innerHTML = `
+                        <div class="embed-field-title">New Field</div>
+                        <div class="embed-field-content">New field content goes here.</div>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    newField.onclick = () => editContent('field' + (document.querySelectorAll('.embed-field, .full-width-field').length));
+                    document.querySelector('.embed-fields').appendChild(newField);
+                } else if (type === 'thumbnail') {
+                    const thumbnailContainer = document.createElement('div');
+                    thumbnailContainer.className = 'embed-thumbnail-container editable';
+                    thumbnailContainer.innerHTML = `
+                        <img src="https://via.placeholder.com/80" alt="Thumbnail" class="embed-thumbnail" onclick="editImage('thumbnail')">
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    embed.appendChild(thumbnailContainer);
+                } else if (type === 'image') {
+                    const imageContainer = document.createElement('div');
+                    imageContainer.className = 'embed-image-container editable';
+                    imageContainer.innerHTML = `
+                        <img src="https://via.placeholder.com/500x200" alt="Embed Image" class="embed-image" onclick="editImage('image')">
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const footer = embed.querySelector('.embed-footer');
+                    embed.insertBefore(imageContainer, footer);
+                } else if (type === 'title') {
+                    const titleContainer = document.createElement('div');
+                    titleContainer.className = 'embed-title-container editable';
+                    titleContainer.innerHTML = `
+                        <div class="embed-title" onclick="editContent('title')">Embed Title</div>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const authorContainer = embed.querySelector('.embed-header');
+                    embed.insertBefore(titleContainer, authorContainer.nextSibling);
+                } else if (type === 'description') {
+                    const descriptionContainer = document.createElement('div');
+                    descriptionContainer.className = 'embed-description-container editable';
+                    descriptionContainer.innerHTML = `
+                        <div class="embed-description" onclick="editContent('description')">This is an example description for the Discord embed.</div>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const fieldsContainer = document.querySelector('.embed-fields');
+                    embed.insertBefore(descriptionContainer, fieldsContainer);
+                } else if (type === 'authorName') {
+                    const authorContainer = document.createElement('div');
+                    authorContainer.className = 'embed-author-container editable';
+                    authorContainer.innerHTML = `
+                        <span class="embed-author" onclick="editContent('authorName')">Author Name</span>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const authorIconContainer = embed.querySelector('.author-icon-container');
+                    if (authorIconContainer) {
+                        authorIconContainer.insertAdjacentElement('afterend', authorContainer);
+                    } else {
+                        embed.querySelector('.embed-header').appendChild(authorContainer);
+                    }
+                } else if (type === 'footerText') {
+                    const footerTextContainer = document.createElement('div');
+                    footerTextContainer.className = 'footer-text-container editable';
+                    footerTextContainer.innerHTML = `
+                        <span class="footer-text" onclick="editContent('footerText')">Footer Text</span>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const footer = embed.querySelector('.embed-footer');
+                    const timestamp = footer.querySelector('.timestamp-container');
+                    footer.insertBefore(footerTextContainer, timestamp);
+                } else if (type === 'footerIcon') {
+                    const footerIconContainer = document.createElement('div');
+                    footerIconContainer.className = 'footer-icon-container editable';
+                    footerIconContainer.innerHTML = `
+                        <img src="https://via.placeholder.com/20" alt="Footer Icon" class="footer-icon" onclick="editImage('footerIcon')">
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const footer = embed.querySelector('.embed-footer');
+                    footer.insertBefore(footerIconContainer, footer.firstChild);
+                } else if (type === 'timestamp') {
+                    const timestampContainer = document.createElement('div');
+                    timestampContainer.className = 'timestamp-container editable';
+                    timestampContainer.innerHTML = `
+                        <span class="timestamp" onclick="editContent('timestamp')">- Today at 12:00 PM</span>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    embed.querySelector('.embed-footer').appendChild(timestampContainer);
+                } else if (type === 'url') {
+                    const authorIconContainer = document.createElement('div');
+                    authorIconContainer.className = 'author-icon-container editable';
+                    authorIconContainer.innerHTML = `
+                        <img src="https://via.placeholder.com/20" alt="Author Icon" class="author-icon" onclick="editImage('authorIcon')">
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    const authorNameContainer = embed.querySelector('.embed-author-container');
+                    if (authorNameContainer) {
+                        authorNameContainer.insertAdjacentElement('beforebegin', authorIconContainer);
+                    } else {
+                        embed.querySelector('.embed-header').appendChild(authorIconContainer);
+                    }
+                }
+
+                updateDropdownState();
+            }
+
+            function editContent(type) {
+                const modal = document.getElementById('modal');
+                const input = document.getElementById('modal-input');
+                const inputName = document.getElementById('modal-input-name');
+                const inputValue = document.getElementById('modal-input-value');
+                const label = document.getElementById('modal-label');
+                const colorOptions = document.getElementById('color-options');
+
+                editType = 'text';
+                input.style.display = 'block';
+                inputName.style.display = 'none';
+                inputValue.style.display = 'none';
+                colorOptions.style.display = 'none';
+
+                if (type === 'title') {
+                    currentElement = document.querySelector('.embed-title');
+                    input.value = currentElement.innerText;
+                    label.innerText = 'Edit Title';
+                } else if (type === 'description') {
+                    currentElement = document.querySelector('.embed-description');
+                    input.value = currentElement.innerText;
+                    label.innerText = 'Edit Description';
+                } else if (type.startsWith('field')) {
+                    const fieldIndex = parseInt(type.replace('field', '')) - 1;
+                    currentElement = document.querySelectorAll('.embed-field, .full-width-field')[fieldIndex];
+                    input.style.display = 'none';
+                    inputName.style.display = 'block';
+                    inputValue.style.display = 'block';
+                    inputName.value = currentElement.querySelector('.embed-field-title').innerText;
+                    inputValue.value = currentElement.querySelector('.embed-field-content').innerText;
+                    label.innerText = `Edit Field ${fieldIndex + 1}`;
+                    editType = 'field';
+                } else if (type === 'authorName') {
+                    currentElement = document.querySelector('.embed-author');
+                    input.value = currentElement.innerText;
+                    label.innerText = 'Edit Author Name';
+                } else if (type === 'footerText') {
+                    currentElement = document.querySelector('.footer-text');
+                    input.value = currentElement.innerText;
+                    label.innerText = 'Edit Footer Text';
+                } else if (type === 'timestamp') {
+                    currentElement = document.querySelector('.timestamp');
+                    input.value = currentElement.innerText;
+                    label.innerText = 'Edit Timestamp';
+                }
+
+                modal.style.display = 'flex';
+            }
+
+            function showFormatModal() {
+                const formatModal = document.getElementById('formatModal');
+                formatModal.style.display = 'flex';
+            }
+
+            function generateEmbedCode(format) {
+                console.log(format)
+                const embed = document.querySelector('.embed');
+                const color = document.getElementById('colorPicker').value;
+                const title = embed.querySelector('.embed-title')?.innerText || '';
+                const description = embed.querySelector('.embed-description')?.innerText || '';
+                const imageUrl = embed.querySelector('.embed-image')?.src || '';
+                const thumbnailUrl = embed.querySelector('.embed-thumbnail')?.src || '';
+                const authorName = embed.querySelector('.embed-author')?.innerText || '';
+                const authorIconUrl = embed.querySelector('.author-icon')?.src || '';
+                const footerText = embed.querySelector('.footer-text')?.innerText || '';
+                const footerIconUrl = embed.querySelector('.footer-icon')?.src || '';
+                const timestamp = embed.querySelector('.timestamp')?.innerText || '';
+
+                let embedCode = '';
+
+                if (format === 'builder') {
+                    embedCode += `const embed = new EmbedBuilder()\n`;
+                    embedCode += `    .setColor('${color}')\n`;
+                    if (title) embedCode += `    .setTitle('${title}')\n`;
+                    if (description) embedCode += `    .setDescription('${description}')\n`;
+                    if (imageUrl) embedCode += `    .setImage('${imageUrl}')\n`;
+                    if (thumbnailUrl) embedCode += `    .setThumbnail('${thumbnailUrl}')\n`;
+                    if (authorName || authorIconUrl) {
+                        embedCode += `    .setAuthor({ name: '${authorName}', iconURL: '${authorIconUrl}' })\n`;
+                    }
+                    if (footerText || footerIconUrl) {
+                        embedCode += `    .setFooter({ text: '${footerText}', iconURL: '${footerIconUrl}' })\n`;
+                    }
+                    if (timestamp) embedCode += `    .setTimestamp()\n`;
+
+                    const fields = embed.querySelectorAll('.embed-field, .full-width-field');
+                    fields.forEach(field => {
+                        const fieldName = field.querySelector('.embed-field-title')?.innerText || '';
+                        const fieldValue = field.querySelector('.embed-field-content')?.innerText || '';
+                        if (fieldName && fieldValue) {
+                            embedCode += `    .addFields({ name: '${fieldName}', value: '${fieldValue}' })\n`;
+                        }
+                    });
+
+                    const buttons = document.querySelectorAll('.button-container .button');
+                    buttons.forEach((button, index) => {
+                        const label = button.innerText.trim();
+                        const style = button.getAttribute('data-style') || 'Primary'; // Retrieve the style from data attribute
+                        embedCode += `\nconst button${index + 1} = new ButtonBuilder()\n`;
+                        embedCode += `    .setLabel('${label}')\n`;
+                        embedCode += `    .setStyle(ButtonStyle.${style})\n`;
+                    });
+
+                    navigator.clipboard.writeText(embedCode).then(() => {
+                        showPopupMessage();
+                    });
+                } else if (format === 'json') {
+                    const embedJson = {
+                        color: parseInt(color.replace('#', ''), 16),
+                        title: title,
+                        description: description,
+                        image: { url: imageUrl },
+                        thumbnail: { url: thumbnailUrl },
+                        author: { name: authorName, icon_url: authorIconUrl },
+                        footer: { text: footerText, icon_url: footerIconUrl },
+                        timestamp: new Date().toISOString()
+                    };
+
+                    const fields = [];
+                    embed.querySelectorAll('.embed-field, .full-width-field').forEach(field => {
+                        const fieldName = field.querySelector('.embed-field-title')?.innerText || '';
+                        const fieldValue = field.querySelector('.embed-field-content')?.innerText || '';
+                        if (fieldName && fieldValue) {
+                            fields.push({ name: fieldName, value: fieldValue });
+                        }
+                    });
+
+                    if (fields.length > 0) {
+                        embedJson.fields = fields;
+                    }
+
+                    // Manually construct the string representation of the object
+                    let embedCode = `{\n`;
+                    for (const [key, value] of Object.entries(embedJson)) {
+                        if (typeof value === 'object' && value !== null) {
+                            embedCode += `  ${key}: ${JSON.stringify(value)},\n`;
+                        } else if (typeof value === 'string') {
+                            embedCode += `  ${key}: '${value}',\n`;
+                        } else {
+                            embedCode += `  ${key}: ${value},\n`;
+                        }
+                    }
+                    embedCode += `}`;
+
+                    navigator.clipboard.writeText(embedCode).then(() => {
+                        showPopupMessage();
+                    });
+
+                    document.getElementById('formatModal').style.display = 'none';
+                }
+            }
+
+            function showPopupMessage() {
+                const popup = document.getElementById('popupMessage');
+                const embedContainer = document.querySelector('.embed-container');
+                popup.style.display = 'block';
+                embedContainer.classList.add('blurred');
+
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                    embedContainer.classList.remove('blurred');
+                }, 2000); // 2 seconds
+            }
+
+            function editImage(type) {
+                const modal = document.getElementById('modal');
+                const input = document.getElementById('modal-input');
+                const inputName = document.getElementById('modal-input-name');
+                const inputValue = document.getElementById('modal-input-value');
+                const label = document.getElementById('modal-label');
+                const colorOptions = document.getElementById('color-options');
+
+                editType = 'image';
+                input.style.display = 'block';
+                inputName.style.display = 'none'; // Hide field name input
+                inputValue.style.display = 'none'; // Hide field value input
+                colorOptions.style.display = 'none';
+
+                if (type === 'image') {
+                    currentElement = document.querySelector('.embed-image');
+                    input.value = currentElement.src;
+                    label.innerText = 'Edit Embed Image URL';
+                } else if (type === 'thumbnail') {
+                    currentElement = document.querySelector('.embed-thumbnail');
+                    input.value = currentElement.src;
+                    label.innerText = 'Edit Thumbnail URL';
+                } else if (type === 'authorIcon') {
+                    currentElement = document.querySelector('.author-icon');
+                    input.value = currentElement.src;
+                    label.innerText = 'Edit Author Icon URL';
+                } else if (type === 'footerIcon') {
+                    currentElement = document.querySelector('.footer-icon');
+                    input.value = currentElement.src;
+                    label.innerText = 'Edit Footer Icon URL';
+                }
+
+                modal.style.display = 'flex';
+            }
+
+            function editButton(buttonElement) {
+                const modal = document.getElementById('modal');
+                const input = document.getElementById('modal-input');
+                const inputName = document.getElementById('modal-input-name');
+                const inputValue = document.getElementById('modal-input-value');
+                const label = document.getElementById('modal-label');
+                const colorOptions = document.getElementById('color-options');
+
+                editType = 'button';
+                currentElement = buttonElement;
+                input.value = currentElement.innerText.trim();
+                label.innerText = 'Edit Button Text';
+
+                // Get the current button style or default to Primary
+                const currentStyle = currentElement.getAttribute('data-style') || 'Primary';
+                selectedStyle = currentStyle;
+
+                // Pre-select the current button style
+                document.querySelectorAll('.color-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+
+                // Find and select the matching style option
+                const styleMap = {
+                    'Primary': '.color-primary',
+                    'Success': '.color-success',
+                    'Danger': '.color-danger',
+                    'Secondary': '.color-secondary'
+                };
+                
+                if (styleMap[currentStyle]) {
+                    document.querySelector(styleMap[currentStyle]).classList.add('selected');
+                }
+
+                input.style.display = 'block';
+                inputName.style.display = 'none';
+                inputValue.style.display = 'none';
+                colorOptions.style.display = 'block';
+
+                modal.style.display = 'flex';
+            }
+
+            function saveContent() {
+                const inputValue = document.getElementById('modal-input').value.trim();
+                const inputNameValue = document.getElementById('modal-input-name').value.trim();
+                const inputValueValue = document.getElementById('modal-input-value').value.trim();
+
+                const limits = {
+                    title: 256,
+                    description: 4096,
+                    field: {
+                        name: 256,
+                        value: 1024
+                    },
+                    footer: {
+                        text: 2048
+                    },
+                    author: {
+                        name: 256
+                    },
+                    button: 80
+                };
+
+                if (currentElement) {
+                    if (editType === 'text') {
+                        if (currentElement.classList.contains('embed-title')) {
+                            if (inputValue.length > limits.title) {
+                                alert(`Title must be at most ${limits.title} characters.`);
+                                return;
+                            }
+                        } else if (currentElement.classList.contains('embed-description')) {
+                            if (inputValue.length > limits.description) {
+                                alert(`Description must be at most ${limits.description} characters.`);
+                                return;
+                            }
+                        } else if (currentElement.classList.contains('embed-author')) {
+                            if (inputValue.length > limits.author.name) {
+                                alert(`Author name must be at most ${limits.author.name} characters.`);
+                                return;
+                            }
+                        } else if (currentElement.classList.contains('footer-text')) {
+                            if (inputValue.length > limits.footer.text) {
+                                alert(`Footer text must be at most ${limits.footer.text} characters.`);
+                                return;
+                            }
+                        }
+                        currentElement.innerText = inputValue;
+                    } else if (editType === 'button') {
+                        if (inputValue.length > limits.button) {
+                            alert(`Button label must be at most ${limits.button} characters.`);
+                            return;
+                        }
+                        currentElement.innerText = inputValue;
+                        
+                        // Apply the selected style
+                        currentElement.setAttribute('data-style', selectedStyle);
+                        
+                        // Set the button color based on the style
+                        const styleColors = {
+                            'Primary': '#7289DA',   // Blurple
+                            'Success': '#43B581',  // Green
+                            'Danger': '#F04747',   // Red
+                            'Secondary': '#99AAB5'  // Grey
+                        };
+                        
+                        currentElement.style.backgroundColor = styleColors[selectedStyle];
+                    } else if (editType === 'image') {
+                        currentElement.src = inputValue;
+                    } else if (editType === 'field') {
+                        if (inputNameValue.length > limits.field.name) {
+                            alert(`Field name must be at most ${limits.field.name} characters.`);
+                            return;
+                        }
+                        if (inputValueValue.length > limits.field.value) {
+                            alert(`Field value must be at most ${limits.field.value} characters.`);
+                            return;
+                        }
+                        currentElement.querySelector('.embed-field-title').innerText = inputNameValue;
+                        currentElement.querySelector('.embed-field-content').innerText = inputValueValue;
+                    }
+                }
+
+                document.getElementById('modal').style.display = 'none';
+            }
+
+            function removeElement(event, btn) {
+                event.stopPropagation();
+                const parent = btn.parentElement;
+
+                parent.classList.add('fade-out');
+
+                parent.addEventListener('transitionend', function () {
+                    parent.remove();
+                    checkButtonLimit();
+                    updateDropdownState();
+                });
+            }
+
+            function addButton() {
+                const buttonsContainer = document.querySelector('.buttons');
+                const buttonCount = buttonsContainer.querySelectorAll('.button-container').length - 1;
+
+                if (buttonCount < 5) {
+                    const newButtonContainer = document.createElement('div');
+                    newButtonContainer.className = 'button-container editable';
+                    newButtonContainer.draggable = true;
+                    newButtonContainer.innerHTML = `
+                        <button class="button" onclick="editButton(this)" data-style="Primary">New Button</button>
+                        <button class="close-btn" onclick="removeElement(event, this)">×</button>
+                    `;
+                    buttonsContainer.insertBefore(newButtonContainer, buttonsContainer.lastElementChild);
+                    
+                    // Add drag event listeners to the new button
+                    addDragListeners(newButtonContainer);
+                }
+
+                checkButtonLimit();
+            }
+
+            function checkButtonLimit() {
+                const buttonsContainer = document.querySelector('.buttons');
+                const buttonCount = buttonsContainer.querySelectorAll('.button-container').length - 1;
+                const plusIcon = buttonsContainer.querySelector('.plus-icon-button');
+
+                if (buttonCount >= 5) {
+                    plusIcon.style.display = 'none';
+                } else {
+                    plusIcon.style.display = 'block';
+                }
+            }
+
+            function selectButtonStyle(style, element) {
+                selectedStyle = style;
+
+                document.querySelectorAll('.color-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+
+                if (element) {
+                    element.classList.add('selected');
+                }
+            }
+            
+            // Theme toggle function
+            function toggleTheme() {
+                document.body.classList.toggle('light-theme');
+                const isLightTheme = document.body.classList.contains('light-theme');
+                localStorage.setItem('discordEmbedTheme', isLightTheme ? 'light' : 'dark');
+            }
+
+            function capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+
+            function changeBorderColor() {
+                const colorPicker = document.getElementById('colorPicker');
+                const embed = document.querySelector('.embed');
+                embed.style.borderLeftColor = colorPicker.value;
+            }
+
+            window.onclick = function (event) {
+                const modal = document.getElementById('modal');
+                const dropdown = document.getElementById('dropdown');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                } else if (!event.target.closest('.plus-icon') && !event.target.closest('.dropdown')) {
+                    dropdown.style.display = 'none';
+                }
+            }
+
+            window.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    document.getElementById('modal').style.display = 'none';
+                    document.getElementById('settingsDropdown').style.display = 'none';
+                }
+            });
+            
+            function toggleSettingsMenu() {
+                const dropdown = document.getElementById('settingsDropdown');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            }
+            
+            // Close settings dropdown when clicking outside
+            window.addEventListener('click', function(event) {
+                const dropdown = document.getElementById('settingsDropdown');
+                const settingsButton = document.querySelector('.settings-button');
+                
+                if (!event.target.matches('.settings-button') && 
+                    !event.target.closest('#settingsDropdown') && 
+                    dropdown.style.display === 'block') {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            let scale = 1;
+
+            function zoomIn() {
+                scale += 0.1;
+                const embedContainer = document.querySelector('.embed-container');
+                embedContainer.style.transform = `scale(${scale})`;
+                embedContainer.style.transformOrigin = '5 0';
+            }
+
+            function zoomOut() {
+                if (scale > 0.1) {
+                    const embedContainer = document.querySelector('.embed-container');
+                    scale -= 0.1;
+                    embedContainer.style.transform = `scale(${scale})`;
+                    embedContainer.style.transformOrigin = '5 0';
+                }
+            }
+        </script>
+
+    </div>
+
+    <div class="popup-message" id="popupMessage">Code copied to clipboard!</div>
+    
+    <div class="dropdown" id="dropdown">
+        <div class="dropdown-item" id="addField" onclick="addElement('field')">Add New Field</div>
+        <div class="dropdown-item" id="addThumbnail" onclick="addElement('thumbnail')">Add Embed Thumbnail</div>
+        <div class="dropdown-item" id="addImage" onclick="addElement('image')">Add Embed Image</div>
+        <div class="dropdown-item" id="addDescription" onclick="addElement('description')">Add Embed Description</div>
+        <div class="dropdown-item" id="addTitle" onclick="addElement('title')">Add Embed Title</div>
+        <div class="dropdown-item" id="addTimestamp" onclick="addElement('timestamp')">Add Timestamp</div>
+        <div class="dropdown-item" id="addFooterIcon" onclick="addElement('footerIcon')">Add Footer Icon</div>
+        <div class="dropdown-item" id="addFooterText" onclick="addElement('footerText')">Add Footer Text</div>
+        <div class="dropdown-item" id="addAuthorName" onclick="addElement('authorName')">Add Author Name</div>
+        <div class="dropdown-item" id="addUrl" onclick="addElement('url')">Add Author Icon</div>
+    </div>
+
+</body>
+
+</html>

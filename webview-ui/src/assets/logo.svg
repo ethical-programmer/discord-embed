@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <!-- Ring: blurple → violet → pink, with a glossy top highlight -->
+    <linearGradient id="ring" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#8C9BFF"/>
+      <stop offset=".45" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#EB459E"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".55"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="face" cx=".5" cy=".3" r=".75">
+      <stop offset="0" stop-color="#262850"/>
+      <stop offset=".7" stop-color="#14152C"/>
+      <stop offset="1" stop-color="#0D0E1E"/>
+    </radialGradient>
+    <radialGradient id="glow" cx=".5" cy=".42" r=".5">
+      <stop offset="0" stop-color="#7C5CF6" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#7C5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sh" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000" flood-opacity=".5"/>
+    </filter>
+  </defs>
+
+  <!-- ring -->
+  <circle cx="128" cy="128" r="126" fill="url(#ring)"/>
+  <circle cx="128" cy="128" r="126" fill="url(#gloss)"/>
+  <!-- dark face with a thin inner highlight -->
+  <circle cx="128" cy="128" r="113" fill="url(#face)"/>
+  <circle cx="128" cy="128" r="112.5" fill="none" stroke="#fff" stroke-opacity=".14" stroke-width="1.5"/>
+  <circle cx="128" cy="118" r="96" fill="url(#glow)"/>
+
+  <!-- stacked embed cards (option 5), scaled to sit inside the circle -->
+  <g transform="translate(128 132) scale(.74) translate(-128 -127)">
+    <rect x="82" y="40" width="112" height="80" rx="16" fill="#EB459E"/>
+    <rect x="64" y="62" width="148" height="96" rx="18" fill="#8B5CF6" filter="url(#sh)"/>
+    <g filter="url(#sh)">
+      <rect x="42" y="90" width="172" height="124" rx="20" fill="#fff"/>
+    </g>
+    <rect x="60" y="110" width="7" height="84" rx="3.5" fill="#5865F2"/>
+    <rect x="82" y="112" width="72" height="13" rx="6.5" fill="#23264D"/>
+    <rect x="82" y="136" width="108" height="9" rx="4.5" fill="#C9CCE8"/>
+    <rect x="82" y="153" width="84" height="9" rx="4.5" fill="#C9CCE8"/>
+    <rect x="82" y="172" width="46" height="22" rx="8" fill="#5865F2"/>
+  </g>
+
+  <!-- sparkle, kept inside the dark face so it shows on light backgrounds too -->
+  <path d="M190 50c1.3 9.5 5.5 13.7 15 15-9.5 1.3-13.7 5.5-15 15-1.3-9.5-5.5-13.7-15-15 9.5-1.3 13.7-5.5 15-15Z" fill="#fff"/>
+</svg>

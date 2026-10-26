@@ -1,0 +1,89 @@
+{
+  "name": "discord-embed",
+  "displayName": "Discord Embed",
+  "description": "Design Discord embeds and Components V2 messages with a live Discord-style preview, then copy discord.js or JSON code. Buttons, containers, markdown and more.",
+  "publisher": "EthicalProgrammer",
+  "version": "1.1.0",
+  "engines": {
+    "vscode": "^1.93.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization",
+    "Snippets"
+  ],
+  "galleryBanner": {
+    "color": "#14152B",
+    "theme": "dark"
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.showEmbed",
+        "title": "Show Discord Embed",
+        "category": "Discord Embed"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "build": "npm run typecheck && npm run build:extension && npm run build:webview",
+    "build:extension": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node18 --external:vscode --outfile=dist/extension.js --minify",
+    "build:webview": "vite build",
+    "watch:extension": "esbuild src/extension.ts --bundle --platform=node --format=cjs --target=node18 --external:vscode --outfile=dist/extension.js --sourcemap --watch",
+    "watch:webview": "vite build --watch --mode development",
+    "typecheck": "tsc -p . && tsc -p webview-ui",
+    "test": "vitest run",
+    "package": "npx @vscode/vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "20.x",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/vscode": "~1.93.0",
+    "@vitejs/plugin-react": "^4.3.3",
+    "esbuild": "^0.24.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  },
+  "keywords": [
+    "discord",
+    "discord embed",
+    "embed builder",
+    "embed generator",
+    "embed creator",
+    "embed visualizer",
+    "discord.js",
+    "discord bot",
+    "bot",
+    "components v2",
+    "discord components",
+    "container",
+    "buttons",
+    "message builder",
+    "webhook",
+    "json",
+    "rich embed",
+    "preview",
+    "markdown",
+    "editor"
+  ],
+  "icon": "icon.png",
+  "author": "Ethical Programmer",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ethical-programmer/discord-embed.git"
+  },
+  "homepage": "https://github.com/ethical-programmer/discord-embed#readme",
+  "bugs": {
+    "url": "https://github.com/ethical-programmer/discord-embed/issues"
+  }
+}
